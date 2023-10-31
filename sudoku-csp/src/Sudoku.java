@@ -1,6 +1,8 @@
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Sudoku {
   private Field[][] board;
@@ -69,7 +71,38 @@ public class Sudoku {
    * @param grid
    */
   private static void addNeighbours(Field[][] grid) {
-    // TODO: for each field, add its neighbours
+  for(int i = 0; i < grid.length; i++){
+    for(int j = 0; j < grid[i].length; j++){
+      List<Field> neighbours = new ArrayList<>();
+      for(int x = 0; x < grid.length; x++){
+        if (x != i) {
+          neighbours.add(grid[x][j]);
+        }
+      }
+      for(int y = 0; y < grid[i].length; y++){
+        if (y != j) {
+          neighbours.add(grid[i][y]);
+        }
+      }
+      
+      int row = 3*(i/3);
+      int col = 3*(j/3);
+      //System.out.println(row);
+      //System.out.println(col);
+
+      for (int x = row ; x < row + 3; x++){
+        for(int y = col; y < col + 3; y++){
+          //System.out.println("(" + x + "," + y + ")");
+          if (x != i || y != j) {
+            neighbours.add(grid[x][y]);
+          }
+        }
+      }
+
+      grid[i][j].setNeighbours(neighbours);
+    }
+  }
+
   }
 
   /**
@@ -88,5 +121,21 @@ public class Sudoku {
 
   public Field[][] getBoard(){
     return board;
+  }
+
+  /**
+   * Checks whether a move is valid
+   * @param move
+   * @param x
+   * @param y
+   * @return boolean for whether the move is valid
+   */
+  public Boolean validMove(int move, int x, int y){
+    for(Field neighbour : board[x][y].getNeighbours()){
+      if(neighbour.getValue() == move){
+        return false;
+      }
+    }
+    return true;
   }
 }
