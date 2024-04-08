@@ -1,7 +1,21 @@
+/**
+ * AI Principles and Techniques
+ * Programming Assignment 2 - Sudoku solver
+ * 23-11-2023
+ * 
+ * Student: Serge Airapetjan
+ * S. number: s1038921
+ * 
+ * Student: E. Rafael Medel Sanchez
+ * S. number: s1129468
+ */
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
 public class Game {
   private Sudoku sudoku;
@@ -15,54 +29,86 @@ public class Game {
   }
 
   /**
+    * Minimum remaining values heuristic
+    *
+    * @param first
+    * @param second
+    * @return whether the arc's domain of this is greater than the one of other
+    */
+    public Integer MRVHeuristic(Field first, Field second){  // when used O(n)
+        if(first.getDomainSize() > second.getDomainSize())
+            return 1;
+        else if(first.getDomainSize() < second.getDomainSize())
+            return -1;
+        else
+            return 0;  
+    }
+    
+    /**
+     * Degree Heuristic
+     * 
+     * @param first
+     * @param second
+     * @return whether the arc of this puts constraints on more variable than that of other
+     */
+    public Integer degreeHeuristic(Field first, Field second){
+        int[] empties = {0,0};
+        
+        first.getNeighbours().forEach((nb) -> {empties[0] += (nb.getValue() == 0) ? 1 : 0;});
+        second.getNeighbours().forEach((nb) -> {empties[1] += (nb.getValue() == 0) ? 1 : 0;});
+
+        if(empties[0]>empties[1])
+            return -1;
+        else if(empties[0]<empties[1])
+            return 1;
+        else
+            return 0;
+    }
+
+  /**
    * Implementation of the AC-3 algorithm
    * 
    * @return true if the constraints can be satisfied, else false
    */
   public boolean solve() {
-    // TODO: implement AC-3
-    List<List<Field>> arcs = new ArrayList<>();
+    // If a heuristic needs to be used, comment the list and choose the right comparator in the priority queue
+    // In case no heuristic needs to be used, comment the priority queue and use the array list instead
+    Comparator<Arc> customComparator1 = ((arcs1, arcs2) -> MRVHeuristic(arcs1.getLeft(), arcs2.getLeft())); // MRVHeuristic
+    Comparator<Arc> customComparator2 = ((arcs1, arcs2) -> degreeHeuristic(arcs1.getLeft(), arcs2.getLeft())); // degree heuristic
+    PriorityQueue<Arc> arcs = new PriorityQueue<>(customComparator2);
+    //ArrayList<Arc> arcs = new ArrayList<Arc>();
+
+    // Initialize all arcs
     for (int row = 0; row < 9; row++){
       for (int col = 0; col < 9; col++){
         for (Field nb : this.sudoku.getBoard()[row][col].getNeighbours()) {
-          List<Field> arc = new ArrayList<>();
-          arc.add(this.sudoku.getBoard()[row][col]);  
-          arc.add(nb);
-          arcs.add(arc);
+
+          arcs.add(new Arc(this.sudoku.getBoard()[row][col], nb));
         }
       }   
     }
 
-    
+    // AC-3
+    int arc_counter = 0;
     while(!arcs.isEmpty()){
-      List<Field> curArc = arcs.get(0);
-      arcs.remove(curArc);
-      if (revise(curArc)) {
-        if (curArc.get(0).getDomainSize() == 0){
+      arc_counter += 1;
+      Arc curArc = arcs.poll();
+      //Arc curArc = arcs.remove(0);
+      if (curArc.revise()) {
+        if (curArc.getLeft().getDomainSize() == 0){
           return false;
         }
-        for (Field nb : curArc.get(0).getNeighbours()) {
-          if(nb!=curArc.get(1)){
-            List<Field> newArc = new ArrayList<>();
-            newArc.add(nb);
-            newArc.add(curArc.get(0));
-            arcs.add(newArc);
+        for (Field nb : curArc.getLeft().getNeighbours()) {
+          if(nb != curArc.getRight()){
+            Arc newArc = new Arc(nb, curArc.getLeft());
+            if(!arcs.contains(newArc))
+              arcs.add(newArc);
           }
         }
       }
     }
+    System.out.println("arcs: " + arc_counter);
     return true;
-  }
-
-  public boolean revise(List<Field> arc) {
-    boolean revised = false;
-    for (Integer x : arc.get(0).getDomain()) {
-      if (x == arc.get(1).getValue()){
-        arc.get(0).removeFromDomain(x);
-        revised = true;
-      }
-    }
-    return revised;
   }
 
   /**
@@ -109,39 +155,5 @@ public class Game {
     }
 
     return true; // Valid Sudoku
-}
-//   public boolean validSolution() {
-//     for(int row = 0; row < this.sudoku.getBoard().length; row++){
-//       for(int col = 0; col < this.sudoku.getBoard()[row].length; col++){
-//         List<Field> neighbours = this.sudoku.getBoard()[row][col].getNeighbours();
-//         List<Integer> rows = new ArrayList<>();
-//         List<Integer> cols = new ArrayList<>();
-//         List<Integer> square = new ArrayList<>();
-        
-//         if(row == 7 && col == 7){
-//         System.out.println(neighbours.size());
-//                 System.out.println(neighbours);
-
-// //          System.out.println();
-//         }
-//         for(Field neighbour : neighbours){
-//           if(rows.size() != 8)
-//             rows.add(neighbour.getValue());
-//           else if(cols.size() != 8){
-//             cols.add(neighbour.getValue());
-//           }
-//           else{
-//             square.add(neighbour.getValue());
-//           }
-//         }
-//         // Checks whether all elements from the neighbouring rows, cols and the square are distinct
-//         if( rows.size() != rows.stream().distinct().filter(x -> x != 0).count() &&
-//             cols.size() != cols.stream().distinct().filter(x -> x != 0).count() &&
-//             square.size() != square.stream().distinct().filter(x -> x != 0).count()){
-//           return false;
-//         }
-//       }
-//     }
-//     return true;
-//   }
+  }
 }

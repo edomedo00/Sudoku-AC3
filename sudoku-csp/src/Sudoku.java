@@ -1,3 +1,15 @@
+/**
+ * AI Principles and Techniques
+ * Programming Assignment 2 - Sudoku solver
+ * 23-11-2023
+ * 
+ * Student: Serge Airapetjan
+ * S. number: s1038921
+ * 
+ * Student: E. Rafael Medel Sanchez
+ * S. number: s1129468
+ */
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
