@@ -75,7 +75,7 @@ public class Game {
     // In case no heuristic needs to be used, comment the priority queue and use the array list instead
     Comparator<Arc> customComparator1 = ((arcs1, arcs2) -> MRVHeuristic(arcs1.getLeft(), arcs2.getLeft())); // MRVHeuristic
     Comparator<Arc> customComparator2 = ((arcs1, arcs2) -> degreeHeuristic(arcs1.getLeft(), arcs2.getLeft())); // degree heuristic
-    PriorityQueue<Arc> arcs = new PriorityQueue<>(customComparator2);
+    PriorityQueue<Arc> arcs = new PriorityQueue<>(customComparator1);
     //ArrayList<Arc> arcs = new ArrayList<Arc>();
 
     // Initialize all arcs

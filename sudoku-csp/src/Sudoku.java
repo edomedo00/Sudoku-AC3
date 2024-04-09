@@ -72,7 +72,7 @@ public class Sudoku {
         scanner.close();
 		}
 		catch (FileNotFoundException e) {
-			System.out.println("error opening file: "+filename);
+			System.out.println("error opening file: " + filename);
 		}
     addNeighbours(grid);
 		return grid;
